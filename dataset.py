@@ -16,7 +16,18 @@ class bbox_dataset(Dataset):
     def __init__(self, annotations, images):
         # Initialize lists
         self.img_dir = [images[annotation["image_id"]]["file_name"] for annotation in annotations]
-        self.img_labels = [annotation["bbox"] for annotation in annotations]
+        # Append all bbox's to label lists, but make sure each one is scaled to 256x256 pixels
+        for annotation in annotations:
+            scale_x = 256 / images[annotation["image_id"]]["width"]
+            scale_y = 256 / images[annotation["image_id"]]["height"]
+            x, y, w, h = annotation["bbox"]
+            bbox_scaled = [
+                x * scale_x,
+                y * scale_y,
+                w * scale_x,
+                h * scale_y
+            ]
+            self.img_labels.append(bbox_scaled)        
     """
     returns length of dataset
     """
@@ -32,6 +43,7 @@ class bbox_dataset(Dataset):
         image_tensor = TF.to_tensor(image)
 
         label_tensor = torch.tensor(self.img_labels[idx], dtype=torch.float)
+        
         return image_tensor, label_tensor
 
 class category_dataset(Dataset):
