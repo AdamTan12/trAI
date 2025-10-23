@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import torch.nn.functional as F
 import numpy as np
 import torchvision.utils as vutils
-from model import model, add_noise
+from model import testModel, add_noise
 from dataset import bbox_dataset, category_dataset
 
 import json
@@ -28,33 +28,35 @@ annotations = data["annotations"]
 categories = data["categories"]
 
 bbox_dataset = bbox_dataset(annotations, images)
-category_dataset = category_dataset(annotations, images)
+category_dataset = category_dataset(annotations, categories, images)
 
 dataloader = torch.utils.data.DataLoader(bbox_dataset, batch_size=batch_size, shuffle=True, num_workers=workers)
 device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
 
 
-m = model()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, betas=(0.5, 0.999))
+m = testModel()
+optimizer = torch.optim.Adam(m.parameters(), lr=0.0001, betas=(0.5, 0.999))
+if __name__ == '__main__':
+    for epoch in range(num_epochs):
+        for i, data in enumerate(dataloader, 0):
+            optimizer.zero_grad
+            # images: (128, 3, 256, 256)
+            # labels: (128, 59) (there are 59 different categories)
+            images, labels = data
 
-for epoch in range(num_epochs):
-    for i, data in enumerate(dataloader, 0):
-        optimizer.zero_grad
-        # images: (128, 3, 256, 256)
-        # labels: (128, 59) (there are 59 different categories)
-        images, labels = data
+            # the last batch might not be full size of 128, we can skip it as the model expects batches of 128
+            if images.size(0) < batch_size:
+                continue
+            
+            images = add_noise(images)
+            # train on data
+            output = m(images)
+            loss = F.smooth_l1_loss(output, labels)
+            print(loss.shape)
+            print(loss.item())
 
-        # the last batch might not be full size of 128, we can skip it as the model expects batches of 128
-        if images.size(0) < batch_size:
-            continue
-        
-        images = add_noise(images)
-        # train on data
-        output = output(images)
-        loss = F.smooth_l1_loss(output, labels)
-
-        loss.backward()
-        optimizer.step()
+            loss.backward()
+            optimizer.step()
 
 
 

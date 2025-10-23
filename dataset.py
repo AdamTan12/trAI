@@ -16,6 +16,7 @@ class bbox_dataset(Dataset):
     def __init__(self, annotations, images):
         # Initialize lists
         self.img_dir = [images[annotation["image_id"]]["file_name"] for annotation in annotations]
+        self.img_labels = []
         # Append all bbox's to label lists, but make sure each one is scaled to 256x256 pixels
         for annotation in annotations:
             scale_x = 256 / images[annotation["image_id"]]["width"]
@@ -37,7 +38,7 @@ class bbox_dataset(Dataset):
     returns the tensors of an image and labels at the index
     """
     def __getitem__(self, idx):
-        img_path = self.img_dir[idx]
+        img_path = "training_data/data/" + self.img_dir[idx]
         image = Image.open(img_path).convert("RGB")
         image = image.resize((256, 256))
         image_tensor = TF.to_tensor(image)
@@ -69,7 +70,7 @@ class category_dataset(Dataset):
     returns the tensors of an image and labels at the index
     """   
     def __getitem__(self, idx):
-        img_path = self.img_dir[idx]
+        img_path = "training_data/data/" + self.img_dir[idx]
         image = Image.open(img_path).convert("RGB")
         image = image.resize((256, 256))
         image_tensor = TF.to_tensor(image)

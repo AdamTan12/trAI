@@ -15,7 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from IPython.display import HTML
-from scipy.signal import convolve
+#from scipy.signal import convolve
 
 #---parameters---
 nc = 3              #number of color channels
@@ -25,23 +25,24 @@ nf = 64             #length of feature maps
 def add_noise(images, noise_std=0.1):
     return images + noise_std * torch.randn_like(images)
 
-class model(nn.Module):
+class testModel(nn.Module):
     def __init__(self):
-        super(model, self).__init__()
+        super(testModel, self).__init__()
         # add relu functions between layers
         self.layers = nn.Sequential(
             # 3, 256, 256
             nn.Conv2d(nc, nf, 4, stride = 2, padding=1),
+
             # nf, 128, 128
-            nn.Conv2d(nf, nf*2, 4, stride = 2, padding=1),
+            nn.Conv2d(nf, nf*2, 4, stride = 2, padding=1),      nn.ReLU(), 
             # nf*2, 64, 64
-            nn.Conv2d(nf*2, nf*4, 4, stride = 2, padding=1),
+            nn.Conv2d(nf*2, nf*4, 4, stride = 2, padding=1),    nn.ReLU(), 
             # nf*4, 32, 32
-            nn.Conv2d(nf*4, nf*8, 4, stride = 2, padding=1),
+            nn.Conv2d(nf*4, nf*8, 4, stride = 2, padding=1),    nn.ReLU(), 
             # nf*8, 16, 16
-            nn.Conv2d(nf*8, nf*16, 4, stride = 2, padding=1),
+            nn.Conv2d(nf*8, nf*16, 4, stride = 2, padding=1),   nn.ReLU(), 
             # nf*16, 8, 8
-            nn.Conv2d(nf*16, nf*32, 4, stride = 2, padding=1),
+            nn.Conv2d(nf*16, nf*32, 4, stride = 2, padding=1),  nn.ReLU(), 
             # nf*32, 4, 4
             nn.Conv2d(nf*32, 4, 4, stride = 1, padding=0),
         )
@@ -55,8 +56,4 @@ class model(nn.Module):
         self.out = x
         return self.out
     def parameters(self):
-        params = []
-        for layer in self.layers:
-            if isinstance(layer, nn.Module):  # If it's a valid module (e.g., ConvolutionalLayer)
-                params += list(layer.parameters())  # Get parameters of the layer
-        return params
+        return list(self.layers.parameters()) + list(self.head.parameters())
