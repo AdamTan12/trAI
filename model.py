@@ -34,20 +34,23 @@ class testModel(nn.Module):
             nn.Conv2d(nc, nf, 4, stride = 2, padding=1),
 
             # nf, 128, 128
-            nn.Conv2d(nf, nf*2, 4, stride = 2, padding=1),      nn.ReLU(), 
+            nn.Conv2d(nf, nf*2, 4, stride = 2, padding=1),      nn.BatchNorm2d(nf*2),       nn.ReLU(), 
             # nf*2, 64, 64
-            nn.Conv2d(nf*2, nf*4, 4, stride = 2, padding=1),    nn.ReLU(), 
+            nn.Conv2d(nf*2, nf*4, 4, stride = 2, padding=1),    nn.BatchNorm2d(nf*4),       nn.ReLU(), 
             # nf*4, 32, 32
-            nn.Conv2d(nf*4, nf*8, 4, stride = 2, padding=1),    nn.ReLU(), 
+            nn.Conv2d(nf*4, nf*8, 4, stride = 2, padding=1),    nn.BatchNorm2d(nf*8),       nn.ReLU(), 
             # nf*8, 16, 16
-            nn.Conv2d(nf*8, nf*16, 4, stride = 2, padding=1),   nn.ReLU(), 
+            nn.Conv2d(nf*8, nf*16, 4, stride = 2, padding=1),   nn.BatchNorm2d(nf*16),       nn.ReLU(), 
             # nf*16, 8, 8
-            nn.Conv2d(nf*16, nf*32, 4, stride = 2, padding=1),  nn.ReLU(), 
+            nn.Conv2d(nf*16, nf*32, 4, stride = 2, padding=1),  nn.BatchNorm2d(nf*32),       nn.ReLU(), 
             # nf*32, 4, 4
             nn.Conv2d(nf*32, 4, 4, stride = 1, padding=0),
         )
         # we do not use a final relu function because we need outputs to be negative as well
-        self.head = nn.Linear(4, 4)
+        self.head = nn.Sequential(
+            nn.Linear(4, 4), 
+            nn.Sigmoid()
+        )
 
     def __call__(self, x):
         x = self.layers(x)

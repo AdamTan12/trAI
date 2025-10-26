@@ -19,14 +19,16 @@ class bbox_dataset(Dataset):
         self.img_labels = []
         # Append all bbox's to label lists, but make sure each one is scaled to 256x256 pixels
         for annotation in annotations:
-            scale_x = 256 / images[annotation["image_id"]]["width"]
-            scale_y = 256 / images[annotation["image_id"]]["height"]
+            # scale_x = 256 / images[annotation["image_id"]]["width"]
+            # scale_y = 256 / images[annotation["image_id"]]["height"]
+            image_width = images[annotation["image_id"]]["width"]
+            image_height = images[annotation["image_id"]]["height"]
             x, y, w, h = annotation["bbox"]
             bbox_scaled = [
-                x * scale_x,
-                y * scale_y,
-                w * scale_x,
-                h * scale_y
+                x / image_width,
+                y / image_height,
+                w * image_width,
+                h * image_height
             ]
             self.img_labels.append(bbox_scaled)        
     """
